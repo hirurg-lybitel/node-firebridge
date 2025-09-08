@@ -20,7 +20,6 @@ const startServer = async (): Promise<void> => {
       const dbInfo = await firebirdConnection.getDatabaseInfo();
       console.log('Database info:', {
         version: dbInfo.version,
-        ods_version: dbInfo.ods_version,
         page_size: dbInfo.page_size,
         sql_dialect: dbInfo.sql_dialect,
       });

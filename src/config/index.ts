@@ -19,11 +19,11 @@ export const config = {
     lowercase_keys: process.env.FIREBIRD_LOWER_CASE_KEYS === 'true',
   } as FirebirdConfig,
   pool: {
-    min: parseInt(process.env.POOL_MIN || '2', 10),
-    max: parseInt(process.env.POOL_MAX || '10', 10),
+    min: parseInt(process.env['POOL_MIN'] || '2', 10),
+    max: parseInt(process.env['POOL_MAX'] || '10', 10),
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: process.env['CORS_ORIGIN'] || '*',
     credentials: true,
   },
   security: {

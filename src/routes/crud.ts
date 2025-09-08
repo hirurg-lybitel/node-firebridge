@@ -4,7 +4,7 @@ import { asyncHandler, createError } from '../middleware/errorHandler';
 import { validateRequest, validationSchemas } from '../middleware/validation';
 import { ApiResponse, PaginatedResponse } from '../types';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * GET /api/crud/:table
@@ -17,6 +17,9 @@ router.get('/:table',
   }),
   asyncHandler(async (req: Request, res: Response) => {
     const { table } = req.params;
+    if (!table) {
+      throw createError('Table parameter is required', 400);
+    }
     const { page, limit, offset, columns, where, q } = req.query;
 
     // Проверяем существование таблицы
@@ -29,19 +32,29 @@ router.get('/:table',
     }
 
     const selectColumns = columns ? (columns as string).split(',') : ['*'];
-    const whereClause = where || (q ? `CONTAINS(${selectColumns.join(' || ')} || '', '${q}')` : undefined);
+    const searchTerm = q && typeof q === 'string' ? q : '';
+    const whereClause = where || (searchTerm ? `CONTAINS(${selectColumns.join(' || ')} || '', '${searchTerm}')` : undefined);
     
     const pagination = {
-      page: page ? parseInt(page as string, 10) : undefined,
-      limit: limit ? parseInt(limit as string, 10) : undefined,
-      offset: offset ? parseInt(offset as string, 10) : undefined,
+      page: page ? parseInt(page as string, 10) : 0,
+      limit: limit ? parseInt(limit as string, 10) : 0,
+      offset: offset ? parseInt(offset as string, 10) : 0,
     };
 
-    const result = await crudService.select(table, selectColumns, whereClause, [], pagination);
+    const result = await crudService.select(
+      table,
+      selectColumns,
+      typeof whereClause === 'string' ? whereClause : undefined,
+      [],
+      pagination
+    );
 
     if (pagination.page || pagination.limit) {
       // Получаем общее количество записей для пагинации
-      const total = await crudService.count(table, whereClause);
+      const total = await crudService.count(
+        table,
+        typeof whereClause === 'string' ? whereClause : undefined
+      );
       const limitValue = pagination.limit || 100;
       const pageValue = pagination.page || 1;
 
@@ -84,6 +97,12 @@ router.get('/:table/:id',
   }),
   asyncHandler(async (req: Request, res: Response) => {
     const { table, id } = req.params;
+    if (!table) {
+      throw createError('Table parameter is required', 400);
+    }
+    if (!id) {
+      throw createError('ID parameter is required', 400);
+    }
 
     // Проверяем существование таблицы
     const exists = await crudService.getTables().then(tables => 
@@ -94,7 +113,7 @@ router.get('/:table/:id',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-    const result = await crudService.selectById(table, id);
+  const result = await crudService.selectById(table, id);
 
     if (result.count === 0) {
       throw createError(`Record with ID '${id}' not found in table '${table}'`, 404);
@@ -122,6 +141,9 @@ router.post('/:table',
   }),
   asyncHandler(async (req: Request, res: Response) => {
     const { table } = req.params;
+    if (!table) {
+      throw createError('Table parameter is required', 400);
+    }
     const data = req.body;
 
     // Проверяем существование таблицы
@@ -133,7 +155,7 @@ router.post('/:table',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-    const result = await crudService.insertAndReturnId(table, data);
+  const result = await crudService.insertAndReturnId(table, data);
 
     const response: ApiResponse = {
       success: true,
@@ -161,6 +183,12 @@ router.put('/:table/:id',
   }),
   asyncHandler(async (req: Request, res: Response) => {
     const { table, id } = req.params;
+    if (!table) {
+      throw createError('Table parameter is required', 400);
+    }
+    if (!id) {
+      throw createError('ID parameter is required', 400);
+    }
     const data = req.body;
 
     // Проверяем существование таблицы
@@ -173,12 +201,12 @@ router.put('/:table/:id',
     }
 
     // Проверяем существование записи
-    const recordExists = await crudService.existsById(table, id);
+  const recordExists = await crudService.existsById(table, id);
     if (!recordExists) {
       throw createError(`Record with ID '${id}' not found in table '${table}'`, 404);
     }
 
-    const result = await crudService.updateById(table, id, data);
+  const result = await crudService.updateById(table, id, data);
 
     const response: ApiResponse = {
       success: true,
@@ -204,6 +232,12 @@ router.delete('/:table/:id',
   }),
   asyncHandler(async (req: Request, res: Response) => {
     const { table, id } = req.params;
+    if (!table) {
+      throw createError('Table parameter is required', 400);
+    }
+    if (!id) {
+      throw createError('ID parameter is required', 400);
+    }
 
     // Проверяем существование таблицы
     const exists = await crudService.getTables().then(tables => 
@@ -215,12 +249,12 @@ router.delete('/:table/:id',
     }
 
     // Проверяем существование записи
-    const recordExists = await crudService.existsById(table, id);
+  const recordExists = await crudService.existsById(table, id);
     if (!recordExists) {
       throw createError(`Record with ID '${id}' not found in table '${table}'`, 404);
     }
 
-    const result = await crudService.deleteById(table, id);
+  const result = await crudService.deleteById(table, id);
 
     const response: ApiResponse = {
       success: true,
@@ -246,6 +280,9 @@ router.get('/:table/count',
   }),
   asyncHandler(async (req: Request, res: Response) => {
     const { table } = req.params;
+    if (!table) {
+      throw createError('Table parameter is required', 400);
+    }
     const { where } = req.query;
 
     // Проверяем существование таблицы
@@ -257,7 +294,7 @@ router.get('/:table/count',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-    const count = await crudService.count(table, where as string);
+  const count = await crudService.count(table, where as string);
 
     const response: ApiResponse = {
       success: true,

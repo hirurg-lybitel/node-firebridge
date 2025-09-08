@@ -5,7 +5,7 @@ import { asyncHandler, createError } from '../middleware/errorHandler';
 import { validateRequest, validationSchemas, validateSqlQuery } from '../middleware/validation';
 import { ApiResponse } from '../types';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * POST /api/transaction/execute

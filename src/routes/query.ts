@@ -4,7 +4,7 @@ import { asyncHandler, createError } from '../middleware/errorHandler';
 import { validateRequest, validationSchemas, validateSqlQuery } from '../middleware/validation';
 import { ApiResponse, PaginatedResponse } from '../types';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * POST /api/query/execute
@@ -124,9 +124,12 @@ router.get('/tables/:table/schema',
     params: validationSchemas.crudOperation.params,
   }),
   asyncHandler(async (req: Request, res: Response) => {
-    const { table } = req.params;
-    const schema = await crudService.getTableSchema(table);
 
+    const { table } = req.params;
+    if (!table) {
+      throw createError('Table parameter is required', 400);
+    }
+    const schema = await crudService.getTableSchema(table);
     if (!schema.table) {
       throw createError(`Table '${table}' not found`, 404);
     }

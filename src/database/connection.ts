@@ -1,6 +1,10 @@
-import * as Firebird from 'node-firebird-driver-native';
+
+import * as Firebird from 'node-firebird';
 import { config } from '../config';
-import { FirebirdPool, FirebirdConnection, QueryResult, ExecuteResult } from '../types';
+import { QueryResult, ExecuteResult } from '../types';
+
+type FirebirdPool = Firebird.ConnectionPool;
+type FirebirdConnection = Firebird.Database;
 
 class FirebirdConnectionManager {
   private pool: FirebirdPool | null = null;
@@ -40,20 +44,18 @@ class FirebirdConnectionManager {
 
   public async executeQuery(sql: string, params: any[] = []): Promise<QueryResult> {
     const db = await this.getConnection();
-    
     return new Promise((resolve, reject) => {
       db.query(sql, params, (err, result) => {
         db.detach();
-        
         if (err) {
           reject(new Error(`Query execution failed: ${err.message}`));
           return;
         }
-
+        // node-firebird возвращает массив строк
         resolve({
           rows: result || [],
-          meta: result?.meta || [],
-          count: result?.length || 0,
+          meta: [],
+          count: Array.isArray(result) ? result.length : 0,
         });
       });
     });
@@ -61,20 +63,18 @@ class FirebirdConnectionManager {
 
   public async executeCommand(sql: string, params: any[] = []): Promise<ExecuteResult> {
     const db = await this.getConnection();
-    
     return new Promise((resolve, reject) => {
       db.execute(sql, params, (err, result) => {
         db.detach();
-        
         if (err) {
           reject(new Error(`Command execution failed: ${err.message}`));
           return;
         }
-
+        // node-firebird возвращает массив, affectedRows и insertId не поддерживаются
         resolve({
-          affectedRows: result?.affectedRows || 0,
-          insertId: result?.insertId,
-          meta: result?.meta || [],
+          affectedRows: Array.isArray(result) ? result.length : 0,
+          insertId: undefined,
+          meta: [],
         });
       });
     });
@@ -85,9 +85,14 @@ class FirebirdConnectionManager {
     isolation: string = 'READ_COMMITTED'
   ): Promise<T[]> {
     const db = await this.getConnection();
-    
+    // node-firebird требует явно передавать уровень изоляции
+    const isolationLevel = Firebird.ISOLATION_READ_COMMITTED;
     return new Promise((resolve, reject) => {
-      db.transaction((transaction) => {
+      db.transaction(isolationLevel, (err, transaction) => {
+        if (err) {
+          reject(new Error(`Failed to start transaction: ${err.message}`));
+          return;
+        }
         this.executeTransactionOperations(transaction, operations, resolve, reject);
       });
     });
@@ -109,7 +114,10 @@ class FirebirdConnectionManager {
       }
 
       const operation = operations[operationIndex];
-      this.executeTransactionOperation(transaction, operation, results, operationIndex, operations, executeNext, reject);
+      if (operation) {
+        this.executeTransactionOperation(transaction, operation, results, executeNext, reject);
+      }
+      operationIndex++;
     };
 
     executeNext();
@@ -134,8 +142,6 @@ class FirebirdConnectionManager {
     transaction: any,
     operation: { sql: string; params?: any[] },
     results: T[],
-    operationIndex: number,
-    operations: Array<{ sql: string; params?: any[] }>,
     executeNext: () => void,
     reject: (reason?: any) => void
   ): void {
@@ -146,9 +152,7 @@ class FirebirdConnectionManager {
         });
         return;
       }
-
       results.push(result as T);
-      operationIndex++;
       executeNext();
     });
   }
@@ -157,7 +161,6 @@ class FirebirdConnectionManager {
     const sql = `
       SELECT 
         RDB$GET_CONTEXT('SYSTEM', 'ENGINE_VERSION') as version,
-        RDB$GET_CONTEXT('SYSTEM', 'ODS_VERSION') as ods_version,
         MON$PAGE_SIZE as page_size,
         MON$PAGES as pages,
         MON$SWEEP_INTERVAL as sweep_interval,
@@ -169,7 +172,12 @@ class FirebirdConnectionManager {
     `;
     
     const result = await this.executeQuery(sql);
-    return result.rows[0] || {};
+    const row = result.rows[0] || {};
+
+    const lowerCased = Object.fromEntries(
+      Object.entries(row).map(([k, v]) => [k.toLowerCase(), v])
+    );
+    return lowerCased;
   }
 
   public async getTables(): Promise<any[]> {
