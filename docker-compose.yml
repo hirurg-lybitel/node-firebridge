@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  node-firebridge:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - FIREBIRD_HOST=firebird
+      - FIREBIRD_PORT=3050
+      - FIREBIRD_DATABASE=/firebird/data/database.fdb
+      - FIREBIRD_USER=SYSDBA
+      - FIREBIRD_PASSWORD=masterkey
+      - POOL_MIN=2
+      - POOL_MAX=10
+    depends_on:
+      - firebird
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  firebird:
+    image: jacobalberty/firebird:3.0
+    ports:
+      - "3050:3050"
+    environment:
+      - ISC_PASSWORD=masterkey
+      - FIREBIRD_DATABASE=database.fdb
+    volumes:
+      - firebird_data:/firebird/data
+    restart: unless-stopped
+
+volumes:
+  firebird_data:
+
