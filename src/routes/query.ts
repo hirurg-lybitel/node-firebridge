@@ -8,27 +8,27 @@ const router: Router = Router();
 
 /**
  * POST /api/query/execute
- * Выполняет произвольный SQL запрос
+ * Executes an arbitrary SQL query
  */
 router.post('/execute', 
   validateRequest(validationSchemas.executeQuery),
   asyncHandler(async (req: Request, res: Response) => {
     const { sql, params = [], pagination } = req.body;
 
-    // Валидация SQL запроса на безопасность
+    // Validate SQL query for security
     validateSqlQuery(sql);
 
     let result;
     if (pagination) {
-      // Для SELECT запросов с пагинацией
+      // For SELECT queries with pagination
       const limit = pagination.limit || 100;
       const offset = pagination.offset || (pagination.page ? (pagination.page - 1) * limit : 0);
       
-      // Добавляем пагинацию к SQL запросу
+      // Add pagination to SQL query
       const paginatedSql = `${sql} ROWS ${offset + 1} TO ${offset + limit}`;
       result = await crudService.executeQuery(paginatedSql, params);
 
-      // Получаем общее количество записей для пагинации
+      // Get total record count for pagination
       const countSql = `SELECT COUNT(*) as total FROM (${sql}) as count_query`;
       const countResult = await crudService.executeQuery(countSql, params);
       const total = countResult.rows[0]?.TOTAL || 0;
@@ -50,7 +50,7 @@ router.post('/execute',
 
       res.json(response);
     } else {
-      // Обычное выполнение запроса
+      // Regular query execution
       result = await crudService.executeQuery(sql, params);
 
       const response: ApiResponse = {
@@ -67,7 +67,7 @@ router.post('/execute',
 
 /**
  * POST /api/query/command
- * Выполняет SQL команду (INSERT, UPDATE, DELETE, EXECUTE)
+ * Executes an SQL command (INSERT, UPDATE, DELETE, EXECUTE)
  */
 router.post('/command',
   validateRequest({
@@ -76,7 +76,7 @@ router.post('/command',
   asyncHandler(async (req: Request, res: Response) => {
     const { sql, params = [] } = req.body;
 
-    // Валидация SQL запроса на безопасность
+    // Validate SQL query for security
     validateSqlQuery(sql);
 
     const result = await crudService.executeCommand(sql, params);
@@ -98,7 +98,7 @@ router.post('/command',
 
 /**
  * GET /api/query/tables
- * Получает список всех таблиц в базе данных
+ * Gets a list of all tables in the database
  */
 router.get('/tables',
   asyncHandler(async (req: Request, res: Response) => {
@@ -117,7 +117,7 @@ router.get('/tables',
 
 /**
  * GET /api/query/tables/:table/schema
- * Получает схему таблицы
+ * Gets the schema of a table
  */
 router.get('/tables/:table/schema',
   validateRequest({
@@ -147,7 +147,7 @@ router.get('/tables/:table/schema',
 
 /**
  * GET /api/query/database/info
- * Получает информацию о базе данных
+ * Gets database information
  */
 router.get('/database/info',
   asyncHandler(async (req: Request, res: Response) => {

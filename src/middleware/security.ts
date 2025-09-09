@@ -4,12 +4,12 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
 
-// Ограничение количества запросов (например, 100 запросов за 15 минут с одного IP)
+// Rate limiting (e.g., 100 requests per 15 minutes per IP)
 export const rateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 минут
-  max: 100, // максимум 100 запросов
-  standardHeaders: true, // Возвращать информацию в заголовках RateLimit-*
-  legacyHeaders: false, // Отключить заголовки X-RateLimit-*
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // maximum 100 requests
+  standardHeaders: true, // Return info in RateLimit-* headers
+  legacyHeaders: false, // Disable X-RateLimit-* headers
   message: (req: Request) => ({
     success: false,
     error: 'Too many requests, please try again later.',
@@ -18,7 +18,7 @@ export const rateLimiter = rateLimit({
   }),
 });
 
-// Настройка helmet для безопасности
+// Helmet configuration for security
 export const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
@@ -31,7 +31,7 @@ export const securityHeaders = helmet({
   crossOriginEmbedderPolicy: false,
 });
 
-// Middleware для добавления request ID
+// Middleware to add request ID
 export const requestId = (req: Request, res: Response, next: NextFunction): void => {
   const requestId = req.headers['x-request-id'] as string || 
                    `req_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
@@ -41,12 +41,12 @@ export const requestId = (req: Request, res: Response, next: NextFunction): void
   next();
 };
 
-// Middleware для логирования запросов
+// Middleware for request logging
 export const requestLogger = (req: Request, res: Response, next: NextFunction): void => {
   const start = Date.now();
   const requestId = req.headers['x-request-id'] as string;
 
-  // Логирование входящего запроса
+  // Log incoming request
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`, {
     requestId,
     ip: req.ip,
@@ -54,7 +54,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
     contentType: req.get('Content-Type'),
   });
 
-  // Перехват ответа для логирования
+  // Intercept response for logging
   const originalSend = res.send;
   res.send = function(data) {
     const duration = Date.now() - start;
@@ -71,7 +71,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
   next();
 };
 
-// Middleware для проверки подключения к базе данных
+// Middleware to check database connection
 export const databaseHealthCheck = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { firebirdConnection } = await import('../database/connection');
@@ -99,7 +99,7 @@ export const databaseHealthCheck = async (req: Request, res: Response, next: Nex
   }
 };
 
-// Middleware для валидации Content-Type
+// Middleware to validate Content-Type
 export const validateContentType = (req: Request, res: Response, next: NextFunction): void => {
   if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
     const contentType = req.get('Content-Type');
@@ -116,7 +116,7 @@ export const validateContentType = (req: Request, res: Response, next: NextFunct
   next();
 };
 
-// Middleware для ограничения размера тела запроса
+// Middleware to limit request body size
 export const bodySizeLimit = (req: Request, res: Response, next: NextFunction): void => {
   const contentLength = parseInt(req.get('Content-Length') || '0', 10);
   const maxSize = 10 * 1024 * 1024; // 10MB

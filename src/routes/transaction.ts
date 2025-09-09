@@ -9,14 +9,14 @@ const router: Router = Router();
 
 /**
  * POST /api/transaction/execute
- * Выполняет пакет операций в транзакции
+ * Executes a batch of operations in a transaction
  */
 router.post('/execute',
   validateRequest(validationSchemas.transaction),
   asyncHandler(async (req: Request, res: Response) => {
     const { operations, isolation } = req.body;
 
-    // Валидация всех SQL запросов на безопасность
+    // Validate all SQL queries for security
     for (const operation of operations) {
       validateSqlQuery(operation.sql);
     }
@@ -38,7 +38,7 @@ router.post('/execute',
 
       res.json(response);
     } catch (error) {
-      // Транзакция автоматически откатывается при ошибке
+      // Transaction is automatically rolled back on error
       throw createError(`Transaction failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 500);
     }
   })
@@ -46,7 +46,7 @@ router.post('/execute',
 
 /**
  * POST /api/transaction/batch-insert
- * Выполняет пакетную вставку записей в транзакции
+ * Performs batch insert of records in a transaction
  */
 router.post('/batch-insert',
   validateRequest({
@@ -63,7 +63,7 @@ router.post('/batch-insert',
   asyncHandler(async (req: Request, res: Response) => {
     const { table, records } = req.body;
 
-    // Проверяем существование таблицы
+    // Check if the table exists
     const exists = await crudService.getTables().then(tables => 
       tables.some(t => t.name === table.toUpperCase())
     );
@@ -72,7 +72,7 @@ router.post('/batch-insert',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-    // Подготавливаем операции для транзакции
+    // Prepare operations for the transaction
     const operations = records.map((record: Record<string, any>) => {
       const columns = Object.keys(record);
       const values = Object.values(record);
@@ -107,7 +107,7 @@ router.post('/batch-insert',
 
 /**
  * POST /api/transaction/batch-update
- * Выполняет пакетное обновление записей в транзакции
+ * Performs batch update of records in a transaction
  */
 router.post('/batch-update',
   validateRequest({
@@ -131,7 +131,7 @@ router.post('/batch-update',
   asyncHandler(async (req: Request, res: Response) => {
     const { table, updates, idColumn } = req.body;
 
-    // Проверяем существование таблицы
+    // Check if the table exists
     const exists = await crudService.getTables().then(tables => 
       tables.some(t => t.name === table.toUpperCase())
     );
@@ -140,7 +140,7 @@ router.post('/batch-update',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-    // Подготавливаем операции для транзакции
+    // Prepare operations for the transaction
     const operations = updates.map((update: { id: any; data: Record<string, any> }) => {
       const setClause = Object.keys(update.data)
         .map(key => `${key} = ?`)
@@ -177,7 +177,7 @@ router.post('/batch-update',
 
 /**
  * POST /api/transaction/batch-delete
- * Выполняет пакетное удаление записей в транзакции
+ * Performs batch delete of records in a transaction
  */
 router.post('/batch-delete',
   validateRequest({
@@ -195,7 +195,7 @@ router.post('/batch-delete',
   asyncHandler(async (req: Request, res: Response) => {
     const { table, ids, idColumn } = req.body;
 
-    // Проверяем существование таблицы
+    // Check if the table exists
     const exists = await crudService.getTables().then(tables => 
       tables.some(t => t.name === table.toUpperCase())
     );
@@ -204,7 +204,7 @@ router.post('/batch-delete',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-    // Подготавливаем операции для транзакции
+    // Prepare operations for the transaction
     const operations = ids.map((id: any) => ({
       sql: `DELETE FROM ${table} WHERE ${idColumn} = ?`,
       params: [id],

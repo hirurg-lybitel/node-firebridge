@@ -45,13 +45,28 @@ class FirebirdConnectionManager {
   public async executeQuery(sql: string, params: any[] = []): Promise<QueryResult> {
     const db = await this.getConnection();
     return new Promise((resolve, reject) => {
+      let timeoutId: NodeJS.Timeout | null = null;
+      let finished = false;
+
+      // Set up timeout
+      const timeoutMs = config.firebird.queryTimeout || 10000;
+      timeoutId = setTimeout(() => {
+        if (!finished) {
+          finished = true;
+          db.detach();
+          reject(new Error(`Query timed out after ${timeoutMs} ms`));
+        }
+      }, timeoutMs);
+
       db.query(sql, params, (err, result) => {
+        if (finished) return;
+        finished = true;
+        if (timeoutId) clearTimeout(timeoutId);
         db.detach();
         if (err) {
           reject(new Error(`Query execution failed: ${err.message}`));
           return;
         }
-
         resolve({
           rows: result || [],
           meta: [],
@@ -64,13 +79,28 @@ class FirebirdConnectionManager {
   public async executeCommand(sql: string, params: any[] = []): Promise<ExecuteResult> {
     const db = await this.getConnection();
     return new Promise((resolve, reject) => {
+      let timeoutId: NodeJS.Timeout | null = null;
+      let finished = false;
+
+      // Set up timeout
+      const timeoutMs = config.firebird.queryTimeout || 10000;
+      timeoutId = setTimeout(() => {
+        if (!finished) {
+          finished = true;
+          db.detach();
+          reject(new Error(`Command timed out after ${timeoutMs} ms`));
+        }
+      }, timeoutMs);
+
       db.execute(sql, params, (err, result) => {
+        if (finished) return;
+        finished = true;
+        if (timeoutId) clearTimeout(timeoutId);
         db.detach();
         if (err) {
           reject(new Error(`Command execution failed: ${err.message}`));
           return;
         }
-
         resolve({
           affectedRows: Array.isArray(result) ? result.length : 0,
           recordId: Array.isArray(result) && result.length === 0 ? result[0] : undefined,

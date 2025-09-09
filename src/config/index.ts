@@ -17,6 +17,7 @@ export const config = {
     role: process.env.FIREBIRD_ROLE || undefined,
     pageSize: parseInt(process.env.FIREBIRD_PAGE_SIZE || '4096', 10),
     lowercase_keys: process.env.FIREBIRD_LOWER_CASE_KEYS === 'true',
+    queryTimeout: parseInt(process.env.FIREBIRD_QUERY_TIMEOUT || '10000', 10),
   } as FirebirdConfig,
   pool: {
     min: parseInt(process.env.POOL_MIN || '2', 10),

@@ -7,6 +7,7 @@ export interface FirebirdConfig {
   role?: string;
   pageSize?: number;
   lowercase_keys?: boolean;
+  queryTimeout?: number;
 }
 
 export interface FirebirdConnection {
