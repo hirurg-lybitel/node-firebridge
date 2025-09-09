@@ -44,13 +44,14 @@ export class CrudService {
    */
   public async insert(
     tableName: string,
-    data: Record<string, any>
+    data: Record<string, any>,
+    idColumn: string = 'ID'
   ): Promise<ExecuteResult> {
     const columns = Object.keys(data);
     const values = Object.values(data);
     const placeholders = columns.map(() => '?').join(', ');
     
-    const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders})`;
+    const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders}) ${idColumn ? `RETURNING ${idColumn}` : ''}`;
     return await firebirdConnection.executeCommand(sql, values);
   }
 
@@ -59,19 +60,18 @@ export class CrudService {
    */
   public async insertAndReturnId(
     tableName: string,
-    data: Record<string, any>,
-    idColumn: string = 'ID'
+    data: Record<string, any>
   ): Promise<{ result: ExecuteResult; id: any }> {
     const result = await this.insert(tableName, data);
-    
+
     // Получаем последний вставленный ID
-    const idResult = await firebirdConnection.executeQuery(
-      `SELECT GEN_ID(${tableName}_${idColumn}_GEN, 0) as LAST_ID FROM RDB$DATABASE`
-    );
+    // const idResult = await firebirdConnection.executeQuery(
+    //   `SELECT GEN_ID(GD_G_UNIQUE, 0) as LAST_ID FROM RDB$DATABASE`
+    // );
     
     return {
       result,
-      id: idResult.rows[0]?.LAST_ID
+      id: result.recordId
     };
   }
 
@@ -82,14 +82,15 @@ export class CrudService {
     tableName: string,
     data: Record<string, any>,
     whereClause: string,
-    params: any[] = []
+    params: any[] = [],
+    idColumn: string = 'ID'
   ): Promise<ExecuteResult> {
     const setClause = Object.keys(data)
       .map(key => `${key} = ?`)
       .join(', ');
     
     const values = [...Object.values(data), ...params];
-    const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereClause}`;
+    const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereClause} ${idColumn ? `RETURNING ${idColumn}` : ''}`;
     
     return await firebirdConnection.executeCommand(sql, values);
   }

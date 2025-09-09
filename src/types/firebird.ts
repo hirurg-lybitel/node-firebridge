@@ -38,7 +38,7 @@ export interface QueryResult {
 
 export interface ExecuteResult {
   affectedRows: number;
-  insertId?: number | undefined;
+  recordId?: number | undefined;
   meta: any[];
 }
 

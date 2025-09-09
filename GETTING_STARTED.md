@@ -1,35 +1,36 @@
+
 # Getting Started with Node Firebridge
 
-Этот документ поможет вам быстро запустить Node Firebridge API сервер.
+This document will help you quickly launch the Node Firebridge API server.
 
-## Быстрый старт
+## Quick Start
 
-### 1. Установка зависимостей
+### 1. Install Dependencies
 
-#### Используя pnpm (рекомендуется):
+#### Using pnpm (recommended):
 
 ```bash
-# Установка pnpm (если не установлен)
+# Install pnpm (if not installed)
 npm install -g pnpm
 
-# Установка зависимостей
+# Install dependencies
 pnpm install
 ```
 
-#### Используя npm:
+#### Using npm:
 
 ```bash
 npm install
 ```
 
-### 2. Настройка базы данных
+### 2. Configure the Database
 
-Скопируйте файл конфигурации:
+Copy the configuration file:
 ```bash
 cp env.example .env
 ```
 
-Отредактируйте `.env` файл с настройками вашей базы данных Firebird:
+Edit the `.env` file with your Firebird database settings:
 
 ```env
 # Firebird Database Configuration
@@ -51,49 +52,49 @@ POOL_MIN=2
 POOL_MAX=10
 ```
 
-### 3. Запуск сервера
+### 3. Start the Server
 
-#### Используя pnpm (рекомендуется):
+#### Using pnpm (recommended):
 
-**Режим разработки (с hot reload):**
+**Development mode (with hot reload):**
 ```bash
 pnpm dev
 ```
 
-**Продакшн режим:**
+**Production mode:**
 ```bash
 pnpm build
 pnpm start
 ```
 
-#### Используя npm:
+#### Using npm:
 
-**Режим разработки (с hot reload):**
+**Development mode (with hot reload):**
 ```bash
 npm run dev
 ```
 
-**Продакшн режим:**
+**Production mode:**
 ```bash
 npm run build
 npm start
 ```
 
-### 4. Проверка работы
+### 4. Verify Operation
 
-Откройте браузер и перейдите по адресу:
-- http://localhost:3000 - главная страница API
-- http://localhost:3000/health - проверка состояния сервера и базы данных
+Open your browser and go to:
+- http://localhost:3000 - API main page
+- http://localhost:3000/health - server and database health check
 
-## Примеры использования API
+## API Usage Examples
 
-### 1. Получение списка таблиц
+### 1. Get List of Tables
 
 ```bash
 curl http://localhost:3000/api/query/tables
 ```
 
-### 2. Выполнение SQL запроса
+### 2. Execute SQL Query
 
 ```bash
 curl -X POST http://localhost:3000/api/query/execute \
@@ -103,14 +104,14 @@ curl -X POST http://localhost:3000/api/query/execute \
   }'
 ```
 
-### 3. CRUD операции
+### 3. CRUD Operations
 
-#### Получение всех записей из таблицы:
+#### Get all records from a table:
 ```bash
 curl http://localhost:3000/api/crud/your_table?page=1&limit=10
 ```
 
-#### Создание новой записи:
+#### Create a new record:
 ```bash
 curl -X POST http://localhost:3000/api/crud/your_table \
   -H "Content-Type: application/json" \
@@ -120,7 +121,7 @@ curl -X POST http://localhost:3000/api/crud/your_table \
   }'
 ```
 
-#### Обновление записи:
+#### Update a record:
 ```bash
 curl -X PUT http://localhost:3000/api/crud/your_table/1 \
   -H "Content-Type: application/json" \
@@ -129,12 +130,12 @@ curl -X PUT http://localhost:3000/api/crud/your_table/1 \
   }'
 ```
 
-#### Удаление записи:
+#### Delete a record:
 ```bash
 curl -X DELETE http://localhost:3000/api/crud/your_table/1
 ```
 
-### 4. Транзакции
+### 4. Transactions
 
 ```bash
 curl -X POST http://localhost:3000/api/transaction/execute \
@@ -153,57 +154,57 @@ curl -X POST http://localhost:3000/api/transaction/execute \
   }'
 ```
 
-## Структура проекта
+## Project Structure
 
 ```
 src/
-├── config/          # Конфигурация приложения
-├── database/        # Подключение к БД и CRUD операции
+├── config/          # Application configuration
+├── database/        # DB connection and CRUD operations
 ├── middleware/      # Express middleware
-├── routes/          # API маршруты
-├── types/           # TypeScript типы
-├── utils/           # Утилиты
-├── app.ts           # Конфигурация Express приложения
-└── index.ts         # Точка входа сервера
+├── routes/          # API routes
+├── types/           # TypeScript types
+├── utils/           # Utilities
+├── app.ts           # Express app configuration
+└── index.ts         # Server entry point
 ```
 
-## Доступные команды
+## Available Commands
 
-### Используя pnpm (рекомендуется):
+### Using pnpm (recommended):
 
-- `pnpm dev` - запуск в режиме разработки
-- `pnpm build` - сборка TypeScript
-- `pnpm start` - запуск продакшн сервера
-- `pnpm lint` - проверка кода линтером
-- `pnpm lint:fix` - исправление ошибок линтера
-- `pnpm clean` - очистка директории сборки
+- `pnpm dev` - start in development mode
+- `pnpm build` - build TypeScript
+- `pnpm start` - start production server
+- `pnpm lint` - run linter
+- `pnpm lint:fix` - fix linter errors
+- `pnpm clean` - clean build directory
 
-### Используя npm:
+### Using npm:
 
-- `npm run dev` - запуск в режиме разработки
-- `npm run build` - сборка TypeScript
-- `npm start` - запуск продакшн сервера
-- `npm run lint` - проверка кода линтером
-- `npm run lint:fix` - исправление ошибок линтера
-- `npm run clean` - очистка директории сборки
+- `npm run dev` - start in development mode
+- `npm run build` - build TypeScript
+- `npm start` - start production server
+- `npm run lint` - run linter
+- `npm run lint:fix` - fix linter errors
+- `npm run clean` - clean build directory
 
-## Безопасность
+## Security
 
-- Все SQL запросы валидируются на предмет инъекций
-- Ограничение скорости запросов (rate limiting)
-- Валидация входных данных
-- Безопасные заголовки HTTP
+- All SQL queries are validated for injection
+- Rate limiting for requests
+- Input data validation
+- Secure HTTP headers
 
-## Мониторинг
+## Monitoring
 
-- `/health` - проверка состояния сервера и БД
-- Логирование всех запросов с уникальными ID
-- Обработка ошибок с детальным логированием
+- `/health` - server and DB health check
+- Logging of all requests with unique IDs
+- Error handling with detailed logging
 
-## Поддержка
+## Support
 
-При возникновении проблем:
-1. Проверьте подключение к базе данных Firebird
-2. Убедитесь, что все переменные окружения настроены правильно
-3. Проверьте логи сервера
-4. Убедитесь, что база данных Firebird запущена и доступна
+If you encounter problems:
+1. Check your Firebird database connection
+2. Make sure all environment variables are set correctly
+3. Check server logs
+4. Ensure your Firebird database is running and accessible

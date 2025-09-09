@@ -83,9 +83,11 @@ export const notFoundHandler = (req: Request, res: Response): void => {
   res.status(404).json(response);
 };
 
-export const asyncHandler = (fn: Function) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown> | void
+): ((req: Request, res: Response, next: NextFunction) => void) => {
+  return (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch((err) => next(err));
   };
 };
 

@@ -85,7 +85,7 @@ router.post('/command',
       success: true,
       data: {
         affectedRows: result.affectedRows,
-        insertId: result.insertId,
+        recordId: result.recordId,
       },
       message: `Command executed successfully. ${result.affectedRows} rows affected.`,
       timestamp: new Date().toISOString(),

@@ -51,7 +51,7 @@ class FirebirdConnectionManager {
           reject(new Error(`Query execution failed: ${err.message}`));
           return;
         }
-        // node-firebird возвращает массив строк
+
         resolve({
           rows: result || [],
           meta: [],
@@ -70,10 +70,10 @@ class FirebirdConnectionManager {
           reject(new Error(`Command execution failed: ${err.message}`));
           return;
         }
-        // node-firebird возвращает массив, affectedRows и insertId не поддерживаются
+
         resolve({
           affectedRows: Array.isArray(result) ? result.length : 0,
-          insertId: undefined,
+          recordId: Array.isArray(result) && result.length === 0 ? result[0] : undefined,
           meta: [],
         });
       });

@@ -436,7 +436,6 @@ MIT License - see LICENSE file for details.
 ## Documentation
 
 - [Getting Started Guide](GETTING_STARTED.md) - Quick setup instructions
-- [pnpm Setup Guide](PNPM_SETUP.md) - pnpm installation and configuration
 - [Docker Guide](DOCKER.md) - Docker setup and deployment
 - [Changelog](CHANGELOG.md) - Project changes and migration guide
 

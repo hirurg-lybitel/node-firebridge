@@ -7,8 +7,45 @@ import { ApiResponse, PaginatedResponse } from '../types';
 const router: Router = Router();
 
 /**
+ * GET /api/crud/:table/count
+ * Retrieves the number of records in the table
+ */
+router.get('/:table/count',
+  validateRequest({
+    params: validationSchemas.crudOperation.params,
+  }),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { table } = req.params;
+    if (!table) {
+      throw createError('Table parameter is required', 400);
+    }
+    const { where } = req.query;
+
+    // Check if the table exists
+    const exists = await crudService.getTables().then(tables => 
+      tables.some(t => t.name === table.toUpperCase())
+    );
+
+    if (!exists) {
+      throw createError(`Table '${table}' not found`, 404);
+    }
+
+  const count = await crudService.count(table, where as string);
+
+    const response: ApiResponse = {
+      success: true,
+      data: { count },
+      timestamp: new Date().toISOString(),
+      requestId: req.headers['x-request-id'] as string,
+    };
+
+    res.json(response);
+  })
+);
+
+/**
  * GET /api/crud/:table
- * Получает все записи из таблицы с поддержкой пагинации и фильтрации
+ * Retrieves all records from a table with pagination and filtering support
  */
 router.get('/:table',
   validateRequest({
@@ -22,7 +59,7 @@ router.get('/:table',
     }
     const { page, limit, offset, columns, where, q } = req.query;
 
-    // Проверяем существование таблицы
+    // Check if the table exists
     const exists = await crudService.getTables().then(tables => 
       tables.some(t => t.name === table.toUpperCase())
     );
@@ -50,7 +87,7 @@ router.get('/:table',
     );
 
     if (pagination.page || pagination.limit) {
-      // Получаем общее количество записей для пагинации
+      // Get the total number of records for pagination
       const total = await crudService.count(
         table,
         typeof whereClause === 'string' ? whereClause : undefined
@@ -89,7 +126,7 @@ router.get('/:table',
 
 /**
  * GET /api/crud/:table/:id
- * Получает запись по ID
+ * Retrieves a record by ID
  */
 router.get('/:table/:id',
   validateRequest({
@@ -104,7 +141,7 @@ router.get('/:table/:id',
       throw createError('ID parameter is required', 400);
     }
 
-    // Проверяем существование таблицы
+    // Check if the table exists
     const exists = await crudService.getTables().then(tables => 
       tables.some(t => t.name === table.toUpperCase())
     );
@@ -132,7 +169,7 @@ router.get('/:table/:id',
 
 /**
  * POST /api/crud/:table
- * Создает новую запись в таблице
+ * Creates a new record in the table
  */
 router.post('/:table',
   validateRequest({
@@ -146,7 +183,7 @@ router.post('/:table',
     }
     const data = req.body;
 
-    // Проверяем существование таблицы
+    // Check if the table exists
     const exists = await crudService.getTables().then(tables => 
       tables.some(t => t.name === table.toUpperCase())
     );
@@ -174,7 +211,7 @@ router.post('/:table',
 
 /**
  * PUT /api/crud/:table/:id
- * Обновляет запись по ID
+ * Updates a record by ID
  */
 router.put('/:table/:id',
   validateRequest({
@@ -191,7 +228,7 @@ router.put('/:table/:id',
     }
     const data = req.body;
 
-    // Проверяем существование таблицы
+    // Check if the table exists
     const exists = await crudService.getTables().then(tables => 
       tables.some(t => t.name === table.toUpperCase())
     );
@@ -200,13 +237,13 @@ router.put('/:table/:id',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-    // Проверяем существование записи
-  const recordExists = await crudService.existsById(table, id);
+    // Check if the record exists
+    const recordExists = await crudService.existsById(table, id);
     if (!recordExists) {
       throw createError(`Record with ID '${id}' not found in table '${table}'`, 404);
     }
 
-  const result = await crudService.updateById(table, id, data);
+    const result = await crudService.updateById(table, id, data);
 
     const response: ApiResponse = {
       success: true,
@@ -224,7 +261,7 @@ router.put('/:table/:id',
 
 /**
  * DELETE /api/crud/:table/:id
- * Удаляет запись по ID
+ * Deletes a record by ID
  */
 router.delete('/:table/:id',
   validateRequest({
@@ -239,7 +276,7 @@ router.delete('/:table/:id',
       throw createError('ID parameter is required', 400);
     }
 
-    // Проверяем существование таблицы
+    // Check if the table exists
     const exists = await crudService.getTables().then(tables => 
       tables.some(t => t.name === table.toUpperCase())
     );
@@ -248,8 +285,8 @@ router.delete('/:table/:id',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-    // Проверяем существование записи
-  const recordExists = await crudService.existsById(table, id);
+    // Check if the record exists
+    const recordExists = await crudService.existsById(table, id);
     if (!recordExists) {
       throw createError(`Record with ID '${id}' not found in table '${table}'`, 404);
     }
@@ -262,43 +299,6 @@ router.delete('/:table/:id',
         affectedRows: result.affectedRows,
       },
       message: 'Record deleted successfully',
-      timestamp: new Date().toISOString(),
-      requestId: req.headers['x-request-id'] as string,
-    };
-
-    res.json(response);
-  })
-);
-
-/**
- * GET /api/crud/:table/count
- * Получает количество записей в таблице
- */
-router.get('/:table/count',
-  validateRequest({
-    params: validationSchemas.crudOperation.params,
-  }),
-  asyncHandler(async (req: Request, res: Response) => {
-    const { table } = req.params;
-    if (!table) {
-      throw createError('Table parameter is required', 400);
-    }
-    const { where } = req.query;
-
-    // Проверяем существование таблицы
-    const exists = await crudService.getTables().then(tables => 
-      tables.some(t => t.name === table.toUpperCase())
-    );
-
-    if (!exists) {
-      throw createError(`Table '${table}' not found`, 404);
-    }
-
-  const count = await crudService.count(table, where as string);
-
-    const response: ApiResponse = {
-      success: true,
-      data: { count },
       timestamp: new Date().toISOString(),
       requestId: req.headers['x-request-id'] as string,
     };
