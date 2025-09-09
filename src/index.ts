@@ -33,7 +33,7 @@ const startServer = async (): Promise<void> => {
       console.log(`📊 Environment: ${config.server.nodeEnv}`);
       console.log(`🔗 Health check: http://localhost:${config.server.port}/health`);
       console.log(`📖 API documentation: http://localhost:${config.server.port}/`);
-      console.log(`🗄️  Database: ${config.firebird.host}:${config.firebird.port}${config.firebird.database}`);
+      console.log(`🗄️  Database: ${config.firebird.host}:${config.firebird.port}:${config.firebird.database}`);
     });
 
     // Graceful shutdown

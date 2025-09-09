@@ -137,7 +137,7 @@ export class CrudService {
     whereClause?: string,
     params: any[] = []
   ): Promise<number> {
-    let sql = `SELECT COUNT(*) as count FROM ${tableName}`;
+    let sql = `SELECT COUNT(*) FROM ${tableName}`;
     
     if (whereClause) {
       sql += ` WHERE ${whereClause}`;
