@@ -10,7 +10,7 @@ export const validateRequest = (schema: {
   return (req: Request, res: Response, next: NextFunction): void => {
     const errors: string[] = [];
 
-    // Валидация body
+    // Validate body
     if (schema.body) {
       const { error } = schema.body.validate(req.body);
       if (error) {
@@ -18,7 +18,7 @@ export const validateRequest = (schema: {
       }
     }
 
-    // Валидация query параметров
+    // Validate query parameters
     if (schema.query) {
       const { error } = schema.query.validate(req.query);
       if (error) {
@@ -26,7 +26,7 @@ export const validateRequest = (schema: {
       }
     }
 
-    // Валидация params
+    // Validate params
     if (schema.params) {
       const { error } = schema.params.validate(req.params);
       if (error) {
@@ -42,9 +42,9 @@ export const validateRequest = (schema: {
   };
 };
 
-// Схемы валидации для различных операций
+// Validation schemas for various operations
 export const validationSchemas = {
-  // Схема для выполнения произвольного SQL запроса
+  // Schema for executing arbitrary SQL query
   executeQuery: {
     body: Joi.object({
       sql: Joi.string().required().min(1).max(10000),
@@ -57,14 +57,14 @@ export const validationSchemas = {
     }),
   },
 
-  // Схема для CRUD операций
+  // Schema for CRUD operations
   crudOperation: {
     params: Joi.object({
       table: Joi.string().required().min(1).max(50),
     }),
   },
 
-  // Схема для операций с ID
+  // Schema for operations with ID
   idOperation: {
     params: Joi.object({
       table: Joi.string().required().min(1).max(50),
@@ -75,7 +75,7 @@ export const validationSchemas = {
     }),
   },
 
-  // Схема для создания записи
+  // Schema for creating a record
   createRecord: {
     params: Joi.object({
       table: Joi.string().required().min(1).max(50),
@@ -86,7 +86,7 @@ export const validationSchemas = {
     ).min(1).required(),
   },
 
-  // Схема для обновления записи
+  // Schema for updating a record
   updateRecord: {
     params: Joi.object({
       table: Joi.string().required().min(1).max(50),
@@ -101,7 +101,7 @@ export const validationSchemas = {
     ).min(1).required(),
   },
 
-  // Схема для пагинации
+  // Schema for pagination
   pagination: {
     query: Joi.object({
       page: Joi.number().integer().min(1).optional(),
@@ -110,7 +110,7 @@ export const validationSchemas = {
     }),
   },
 
-  // Схема для поиска
+  // Schema for search
   search: {
     query: Joi.object({
       q: Joi.string().min(1).max(100).optional(),
@@ -119,7 +119,7 @@ export const validationSchemas = {
     }),
   },
 
-  // Схема для транзакций
+  // Schema for transactions
   transaction: {
     body: Joi.object({
       operations: Joi.array().items(
@@ -137,7 +137,7 @@ export const validationSchemas = {
   },
 };
 
-// Валидация SQL запроса на безопасность
+// Validate SQL query for security
 export const validateSqlQuery = (sql: string): void => {
   const dangerousPatterns = [
     /DROP\s+(TABLE|DATABASE|INDEX|PROCEDURE|FUNCTION|TRIGGER)/i,
@@ -157,7 +157,7 @@ export const validateSqlQuery = (sql: string): void => {
     }
   }
 
-  // Проверка на минимальную длину и наличие SELECT/INSERT/UPDATE/DELETE
+  // Check for minimum length and presence of SELECT/INSERT/UPDATE/DELETE
   const allowedOperations = /^(SELECT|INSERT|UPDATE|DELETE|EXECUTE|CALL)\s+/i;
   if (!allowedOperations.test(sql.trim())) {
     throw createError('Only SELECT, INSERT, UPDATE, DELETE, EXECUTE, and CALL operations are allowed', 400);

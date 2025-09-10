@@ -1,12 +1,12 @@
 /**
- * Генерирует уникальный ID для запроса
+ * Generates a unique ID for a request
  */
 export const generateRequestId = (): string => {
   return `req_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 };
 
 /**
- * Форматирует ошибку для ответа API
+ * Formats an error for API response
  */
 export const formatError = (error: any): string => {
   if (typeof error === 'string') {
@@ -21,7 +21,7 @@ export const formatError = (error: any): string => {
 };
 
 /**
- * Проверяет, является ли строка валидным SQL идентификатором
+ * Checks if a string is a valid SQL identifier
  */
 export const isValidSqlIdentifier = (identifier: string): boolean => {
   const sqlIdentifierRegex = /^[a-zA-Z_]\w*$/;
@@ -29,7 +29,7 @@ export const isValidSqlIdentifier = (identifier: string): boolean => {
 };
 
 /**
- * Экранирует SQL идентификатор
+ * Escapes a SQL identifier
  */
 export const escapeSqlIdentifier = (identifier: string): string => {
   if (!isValidSqlIdentifier(identifier)) {
@@ -39,7 +39,7 @@ export const escapeSqlIdentifier = (identifier: string): string => {
 };
 
 /**
- * Создает WHERE условие для поиска
+ * Creates a WHERE condition for search
  */
 export const createSearchCondition = (
   searchTerm: string,
@@ -58,7 +58,7 @@ export const createSearchCondition = (
 };
 
 /**
- * Создает ORDER BY условие
+ * Creates an ORDER BY clause
  */
 export const createOrderBy = (
   sortBy?: string,
@@ -76,7 +76,7 @@ export const createOrderBy = (
 };
 
 /**
- * Создает LIMIT и OFFSET для пагинации
+ * Creates LIMIT and OFFSET for pagination
  */
 export const createPagination = (
   page?: number,
@@ -92,7 +92,7 @@ export const createPagination = (
 };
 
 /**
- * Валидирует и нормализует параметры пагинации
+ * Validates and normalizes pagination parameters
  */
 export const normalizePagination = (
   page?: number,
@@ -111,7 +111,7 @@ export const normalizePagination = (
 };
 
 /**
- * Создает SQL для подсчета общего количества записей
+ * Creates SQL for counting total records
  */
 export const createCountQuery = (
   baseQuery: string,
@@ -127,7 +127,7 @@ export const createCountQuery = (
 };
 
 /**
- * Преобразует результат Firebird в стандартный формат
+ * Converts Firebird result to standard format
  */
 export const normalizeFirebirdResult = (result: any): any => {
   if (!result || !Array.isArray(result)) {
@@ -138,7 +138,7 @@ export const normalizeFirebirdResult = (result: any): any => {
     const normalizedRow: any = {};
     
     for (const [key, value] of Object.entries(row)) {
-      // Убираем пробелы из ключей (Firebird часто добавляет их)
+      // Remove spaces from keys (Firebird often adds them)
       const cleanKey = key.trim();
       normalizedRow[cleanKey] = value;
     }
@@ -148,7 +148,7 @@ export const normalizeFirebirdResult = (result: any): any => {
 };
 
 /**
- * Логирует SQL запрос (только в development режиме)
+ * Logs SQL query (only in development mode)
  */
 export const logSqlQuery = (sql: string, params?: any[]): void => {
   if (process.env.NODE_ENV === 'development') {

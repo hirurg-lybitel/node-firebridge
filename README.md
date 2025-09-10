@@ -437,7 +437,6 @@ MIT License - see LICENSE file for details.
 
 - [Getting Started Guide](GETTING_STARTED.md) - Quick setup instructions
 - [Docker Guide](DOCKER.md) - Docker setup and deployment
-- [Changelog](CHANGELOG.md) - Project changes and migration guide
 
 ## Support
 
@@ -445,12 +444,3 @@ For issues and questions:
 - Create an issue on GitHub
 - Check the documentation
 - Review the code examples
-
-## Changelog
-
-### v1.0.0
-- Initial release
-- Full CRUD operations
-- Transaction support
-- Security features
-- TypeScript support

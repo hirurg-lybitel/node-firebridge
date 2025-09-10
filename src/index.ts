@@ -4,7 +4,7 @@ import { firebirdConnection } from './database/connection';
 
 const startServer = async (): Promise<void> => {
   try {
-    // Проверяем подключение к базе данных
+  // Check database connection
     console.log('Testing database connection...');
     const isConnected = await firebirdConnection.testConnection();
     
@@ -15,7 +15,7 @@ const startServer = async (): Promise<void> => {
     
     console.log('Database connection successful');
 
-    // Получаем информацию о базе данных
+    // Get database information
     try {
       const dbInfo = await firebirdConnection.getDatabaseInfo();
       console.log('Database info:', {
@@ -27,7 +27,7 @@ const startServer = async (): Promise<void> => {
       console.warn('Could not retrieve database info:', error);
     }
 
-    // Запускаем сервер
+    // Start the server
     const server = app.listen(config.server.port, () => {
       console.log(`🚀 Server is running on port ${config.server.port}`);
       console.log(`📊 Environment: ${config.server.nodeEnv}`);
@@ -79,6 +79,6 @@ const startServer = async (): Promise<void> => {
   }
 };
 
-// Запускаем сервер
+// Start the server
 startServer();
 
