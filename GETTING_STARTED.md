@@ -1,3 +1,100 @@
+## Asynchronous Query Processing
+
+For long-running SQL queries, you can use the asynchronous API endpoints. This allows you to submit a query, get an immediate response with a requestId, and then poll for status and result.
+
+### Example Usage
+
+#### 1. Submit an Async Query
+
+```
+curl -X POST http://localhost:3000/api/async-query \
+  -H "Content-Type: application/json" \
+  -H "X-Request-ID: my-unique-id-123" \
+  -d '{"sql": "SELECT * FROM big_table", "params": []}'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "requestId": "my-unique-id-123",
+  "status": "processing",
+  "message": "Query is being processed asynchronously."
+}
+```
+
+#### 2. Check Job Status
+
+```
+curl http://localhost:3000/api/jobs/my-unique-id-123/status
+```
+
+**Response (processing):**
+```json
+{
+  "success": true,
+  "requestId": "my-unique-id-123",
+  "status": "processing"
+}
+```
+
+**Response (done):**
+```json
+{
+  "success": true,
+  "requestId": "my-unique-id-123",
+  "status": "done"
+}
+```
+
+**Response (error):**
+```json
+{
+  "success": true,
+  "requestId": "my-unique-id-123",
+  "status": "error"
+}
+```
+
+#### 3. Get Job Result
+
+```
+curl http://localhost:3000/api/jobs/my-unique-id-123/result
+```
+
+**Response (processing):**
+```json
+{
+  "success": false,
+  "status": "processing",
+  "requestId": "my-unique-id-123"
+}
+```
+
+**Response (done):**
+```json
+{
+  "success": true,
+  "requestId": "my-unique-id-123",
+  "result": { /* SQL query result */ }
+}
+```
+
+**Response (error):**
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "requestId": "my-unique-id-123"
+}
+```
+
+#### Client Flow Example
+
+1. Send POST `/api/async-query` with `X-Request-ID` header.
+2. Receive `requestId` and status `processing`.
+3. Poll `/api/jobs/{requestId}/status` until status is `done` or `error`.
+4. When status is `done`, fetch result from `/api/jobs/{requestId}/result`.
 
 # Getting Started with Node Firebridge
 

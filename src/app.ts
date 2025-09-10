@@ -17,6 +17,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import queryRoutes from './routes/query';
 import crudRoutes from './routes/crud';
 import transactionRoutes from './routes/transaction';
+import asyncRoutes from './routes/async';
 
 const app: express.Application = express();
 
@@ -78,6 +79,7 @@ app.get('/health', async (req, res) => {
 app.use('/api/query', databaseHealthCheck, queryRoutes);
 app.use('/api/crud', databaseHealthCheck, crudRoutes);
 app.use('/api/transaction', databaseHealthCheck, transactionRoutes);
+app.use('/api', databaseHealthCheck, asyncRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

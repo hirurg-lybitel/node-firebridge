@@ -6,6 +6,8 @@ import { QueryResult, ExecuteResult } from '../types';
 type FirebirdPool = Firebird.ConnectionPool;
 type FirebirdConnection = Firebird.Database;
 
+const TIMEOUT = config.firebird.queryTimeout || 10000;
+
 class FirebirdConnectionManager {
   private pool: FirebirdPool | null = null;
   private isConnected = false;
@@ -42,14 +44,13 @@ class FirebirdConnectionManager {
     });
   }
 
-  public async executeQuery(sql: string, params: any[] = []): Promise<QueryResult> {
+  public async executeQuery(sql: string, params: any[] = [], timeoutMs: number = TIMEOUT): Promise<QueryResult> {
     const db = await this.getConnection();
     return new Promise((resolve, reject) => {
       let timeoutId: NodeJS.Timeout | null = null;
       let finished = false;
 
       // Set up timeout
-      const timeoutMs = config.firebird.queryTimeout || 10000;
       timeoutId = setTimeout(() => {
         if (!finished) {
           finished = true;
@@ -76,14 +77,13 @@ class FirebirdConnectionManager {
     });
   }
 
-  public async executeCommand(sql: string, params: any[] = []): Promise<ExecuteResult> {
+  public async executeCommand(sql: string, params: any[] = [], timeoutMs: number = TIMEOUT): Promise<ExecuteResult> {
     const db = await this.getConnection();
     return new Promise((resolve, reject) => {
       let timeoutId: NodeJS.Timeout | null = null;
       let finished = false;
 
       // Set up timeout
-      const timeoutMs = config.firebird.queryTimeout || 10000;
       timeoutId = setTimeout(() => {
         if (!finished) {
           finished = true;
@@ -96,6 +96,7 @@ class FirebirdConnectionManager {
         if (finished) return;
         finished = true;
         if (timeoutId) clearTimeout(timeoutId);
+
         db.detach();
         if (err) {
           reject(new Error(`Command execution failed: ${err.message}`));

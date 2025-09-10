@@ -8,6 +8,7 @@ export interface FirebirdConfig {
   pageSize?: number;
   lowercase_keys?: boolean;
   queryTimeout?: number;
+  asyncQueryTimeout?: number;
 }
 
 export interface FirebirdConnection {

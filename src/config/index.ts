@@ -5,26 +5,27 @@ dotenv.config();
 
 export const config = {
   server: {
-    port: parseInt(process.env.PORT || '3000', 10),
-    nodeEnv: process.env.NODE_ENV || 'development',
+    port: parseInt(process.env.PORT ?? '3000', 10),
+    nodeEnv: process.env.NODE_ENV ?? 'development',
   },
   firebird: {
-    host: process.env.FIREBIRD_HOST || 'localhost',
-    port: parseInt(process.env.FIREBIRD_PORT || '3050', 10),
-    database: process.env.FIREBIRD_DATABASE || '',
-    user: process.env.FIREBIRD_USER || 'SYSDBA',
-    password: process.env.FIREBIRD_PASSWORD || 'masterkey',
-    role: process.env.FIREBIRD_ROLE || undefined,
-    pageSize: parseInt(process.env.FIREBIRD_PAGE_SIZE || '4096', 10),
+    host: process.env.FIREBIRD_HOST ?? 'localhost',
+    port: parseInt(process.env.FIREBIRD_PORT ?? '3050', 10),
+    database: process.env.FIREBIRD_DATABASE ?? '',
+    user: process.env.FIREBIRD_USER ?? 'SYSDBA',
+    password: process.env.FIREBIRD_PASSWORD ?? 'masterkey',
+    role: process.env.FIREBIRD_ROLE ?? undefined,
+    pageSize: parseInt(process.env.FIREBIRD_PAGE_SIZE ?? '4096', 10),
     lowercase_keys: process.env.FIREBIRD_LOWER_CASE_KEYS === 'true',
-    queryTimeout: parseInt(process.env.FIREBIRD_QUERY_TIMEOUT || '10000', 10),
+    queryTimeout: parseInt(process.env.FIREBIRD_QUERY_TIMEOUT ?? '10000', 10),
+    asyncQueryTimeout: parseInt(process.env.FIREBIRD_ASYNC_QUERY_TIMEOUT ?? '3600000', 10),
   } as FirebirdConfig,
   pool: {
-    min: parseInt(process.env.POOL_MIN || '2', 10),
-    max: parseInt(process.env.POOL_MAX || '10', 10),
+    min: parseInt(process.env.POOL_MIN ?? '2', 10),
+    max: parseInt(process.env.POOL_MAX ?? '10', 10),
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: process.env.CORS_ORIGIN ?? '*',
     credentials: true,
   },
   security: {

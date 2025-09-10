@@ -30,7 +30,7 @@ router.get('/:table/count',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-  const count = await crudService.count(table, where as string);
+    const count = await crudService.count(table, where as string);
 
     const response: ApiResponse = {
       success: true,
@@ -150,7 +150,7 @@ router.get('/:table/:id',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-  const result = await crudService.selectById(table, id);
+    const result = await crudService.selectById(table, id);
 
     if (result.count === 0) {
       throw createError(`Record with ID '${id}' not found in table '${table}'`, 404);
@@ -192,7 +192,7 @@ router.post('/:table',
       throw createError(`Table '${table}' not found`, 404);
     }
 
-  const result = await crudService.insertAndReturnId(table, data);
+    const result = await crudService.insertAndReturnId(table, data);
 
     const response: ApiResponse = {
       success: true,
@@ -291,7 +291,7 @@ router.delete('/:table/:id',
       throw createError(`Record with ID '${id}' not found in table '${table}'`, 404);
     }
 
-  const result = await crudService.deleteById(table, id);
+    const result = await crudService.deleteById(table, id);
 
     const response: ApiResponse = {
       success: true,

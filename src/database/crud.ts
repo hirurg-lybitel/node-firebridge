@@ -3,7 +3,7 @@ import { QueryResult, ExecuteResult, PaginationParams } from '../types';
 
 export class CrudService {
   /**
-   * Выполняет SELECT запрос с поддержкой пагинации
+   * Executes a SELECT query with pagination support
    */
   public async select(
     tableName: string,
@@ -28,7 +28,7 @@ export class CrudService {
   }
 
   /**
-   * Выполняет SELECT запрос по ID
+   * Executes a SELECT query by ID
    */
   public async selectById(
     tableName: string,
@@ -40,7 +40,7 @@ export class CrudService {
   }
 
   /**
-   * Выполняет INSERT операцию
+   * Executes an INSERT operation
    */
   public async insert(
     tableName: string,
@@ -56,18 +56,14 @@ export class CrudService {
   }
 
   /**
-   * Выполняет INSERT операцию с возвратом ID
+   * Executes an INSERT operation and returns the ID
    */
   public async insertAndReturnId(
     tableName: string,
     data: Record<string, any>
   ): Promise<{ result: ExecuteResult; id: any }> {
-    const result = await this.insert(tableName, data);
-
-    // Получаем последний вставленный ID
-    // const idResult = await firebirdConnection.executeQuery(
-    //   `SELECT GEN_ID(GD_G_UNIQUE, 0) as LAST_ID FROM RDB$DATABASE`
-    // );
+    const idColumn = await this.getPrimaryKey(tableName);
+    const result = await this.insert(tableName, data, idColumn);
     
     return {
       result,
@@ -76,7 +72,7 @@ export class CrudService {
   }
 
   /**
-   * Выполняет UPDATE операцию
+   * Executes an UPDATE operation
    */
   public async update(
     tableName: string,
@@ -96,19 +92,20 @@ export class CrudService {
   }
 
   /**
-   * Выполняет UPDATE операцию по ID
+   * Executes an UPDATE operation by ID
    */
   public async updateById(
     tableName: string,
     id: any,
-    data: Record<string, any>,
-    idColumn: string = 'ID'
+    data: Record<string, any>
   ): Promise<ExecuteResult> {
-    return await this.update(tableName, data, `${idColumn} = ?`, [id]);
+    const idColumn = (await this.getPrimaryKey(tableName));
+
+    return await this.update(tableName, data, `${idColumn} = ?`, [id], idColumn);
   }
 
   /**
-   * Выполняет DELETE операцию
+   * Executes a DELETE operation
    */
   public async delete(
     tableName: string,
@@ -120,7 +117,7 @@ export class CrudService {
   }
 
   /**
-   * Выполняет DELETE операцию по ID
+   * Executes a DELETE operation by ID
    */
   public async deleteById(
     tableName: string,
@@ -131,7 +128,7 @@ export class CrudService {
   }
 
   /**
-   * Выполняет COUNT запрос
+   * Executes a COUNT query
    */
   public async count(
     tableName: string,
@@ -149,7 +146,29 @@ export class CrudService {
   }
 
   /**
-   * Выполняет EXISTS запрос
+   * Executes an EXISTS query
+   */
+  public async getPrimaryKey(
+    tableName: string,
+    params: any[] = []
+  ): Promise<string> {
+    const sql = `
+      SELECT 
+          sg.RDB$FIELD_NAME AS PRIMARY_KEY_FIELD
+      FROM 
+          RDB$RELATION_CONSTRAINTS rc
+      JOIN 
+          RDB$INDEX_SEGMENTS sg ON rc.RDB$INDEX_NAME = sg.RDB$INDEX_NAME
+      WHERE 
+          rc.RDB$CONSTRAINT_TYPE = 'PRIMARY KEY'
+          AND rc.RDB$RELATION_NAME = UPPER('${tableName}')
+      ROWS 1`;
+    const result = await firebirdConnection.executeQuery(sql, params);
+    return result.rows[0]?.PRIMARY_KEY_FIELD?.trim() || '';
+  }
+
+  /**
+   * Executes an EXISTS query
    */
   public async exists(
     tableName: string,
@@ -162,32 +181,32 @@ export class CrudService {
   }
 
   /**
-   * Выполняет EXISTS запрос по ID
+   * Executes an EXISTS query by ID
    */
   public async existsById(
     tableName: string,
     id: any,
-    idColumn: string = 'ID'
   ): Promise<boolean> {
+    const idColumn = await this.getPrimaryKey(tableName);
     return await this.exists(tableName, `${idColumn} = ?`, [id]);
   }
 
   /**
-   * Выполняет произвольный SQL запрос
+   * Executes an arbitrary SQL query
    */
-  public async executeQuery(sql: string, params: any[] = []): Promise<QueryResult> {
-    return await firebirdConnection.executeQuery(sql, params);
+  public async executeQuery(sql: string, params: any[] = [], timeout?: number): Promise<QueryResult> {
+    return await firebirdConnection.executeQuery(sql, params, timeout);
   }
 
   /**
-   * Выполняет произвольную SQL команду
+   * Executes an arbitrary SQL command
    */
   public async executeCommand(sql: string, params: any[] = []): Promise<ExecuteResult> {
     return await firebirdConnection.executeCommand(sql, params);
   }
 
   /**
-   * Выполняет пакет операций в транзакции
+   * Executes a batch of operations in a transaction
    */
   public async executeTransaction<T>(
     operations: Array<{ sql: string; params?: any[] }>
@@ -196,7 +215,7 @@ export class CrudService {
   }
 
   /**
-   * Получает схему таблицы
+   * Gets the schema of a table
    */
   public async getTableSchema(tableName: string): Promise<any> {
     const [tableInfo, columns] = await Promise.all([
@@ -213,14 +232,14 @@ export class CrudService {
   }
 
   /**
-   * Получает список всех таблиц
+   * Gets a list of all tables
    */
   public async getTables(): Promise<any[]> {
     return await firebirdConnection.getTables();
   }
 
   /**
-   * Получает информацию о базе данных
+   * Gets database information
    */
   public async getDatabaseInfo(): Promise<any> {
     return await firebirdConnection.getDatabaseInfo();
