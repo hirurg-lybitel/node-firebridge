@@ -16,8 +16,6 @@ A production-ready REST API server built with TypeScript and node-firebird, offe
 
 ## Quick Start
 
-See the [Getting Started Guide](GETTING_STARTED.md) for step-by-step setup instructions.
-
 ### Prerequisites
 
 - Node.js 18+ 
@@ -69,7 +67,7 @@ POOL_MAX=10
 
 ### Running the Server
 
-#### Using pnpm (Recommended)
+#### Using pnpm
 
 ```bash
 # Development mode with hot reload
@@ -83,22 +81,6 @@ pnpm start
 pnpm lint          # Run ESLint
 pnpm lint:fix      # Fix ESLint errors
 pnpm clean         # Clean build directory
-```
-
-#### Using npm
-
-```bash
-# Development mode with hot reload
-npm run dev
-
-# Production build
-npm run build
-npm start
-
-# Other useful commands
-npm run lint       # Run ESLint
-npm run lint:fix   # Fix ESLint errors
-npm run clean      # Clean build directory
 ```
 
 The server will start on `http://localhost:3000` (or your configured PORT).
