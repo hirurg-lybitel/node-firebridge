@@ -13,7 +13,10 @@ A production-ready REST API server built with TypeScript and node-firebird, offe
 - 📝 **TypeScript** - Full type safety and IntelliSense support
 - 🏗️ **Production Ready** - Graceful shutdown, error handling, logging
 
+
 ## Quick Start
+
+See the [Getting Started Guide](GETTING_STARTED.md) for step-by-step setup instructions.
 
 ### Prerequisites
 
@@ -24,7 +27,7 @@ A production-ready REST API server built with TypeScript and node-firebird, offe
 
 ### Installation
 
-#### Using pnpm (Recommended)
+#### Using pnpm
 
 ```bash
 # Clone the repository
@@ -33,22 +36,6 @@ cd node-firebridge
 
 # Install dependencies with pnpm
 pnpm install
-
-# Copy environment configuration
-cp env.example .env
-
-# Edit .env with your Firebird database settings
-```
-
-#### Using npm
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd node-firebridge
-
-# Install dependencies
-npm install
 
 # Copy environment configuration
 cp env.example .env
