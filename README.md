@@ -317,7 +317,7 @@ src/
 
 ### Available Scripts
 
-#### Using pnpm (Recommended)
+#### Using pnpm
 
 ```bash
 pnpm dev             # Start development server with hot reload
@@ -327,18 +327,6 @@ pnpm lint            # Run ESLint
 pnpm lint:fix        # Fix ESLint errors
 pnpm clean           # Clean build directory
 pnpm test            # Run tests (when implemented)
-```
-
-#### Using npm
-
-```bash
-npm run dev          # Start development server with hot reload
-npm run build        # Build TypeScript to JavaScript
-npm start            # Start production server
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint errors
-npm run clean        # Clean build directory
-npm test             # Run tests (when implemented)
 ```
 
 ### Adding New Features
