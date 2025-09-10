@@ -1,4 +1,4 @@
-# node-firebridge
+# Node Firebridge: TypeScript REST API for Firebird Databases
 
 A production-ready REST API server built with TypeScript and node-firebird, offering full CRUD operations, transactional queries, and modern Firebird 3+ support. Designed for robust integration, maintainability, and extensibility.
 
