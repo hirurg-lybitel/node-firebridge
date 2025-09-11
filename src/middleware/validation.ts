@@ -158,9 +158,9 @@ export const validateSqlQuery = (sql: string): void => {
   }
 
   // Check for minimum length and presence of SELECT/INSERT/UPDATE/DELETE
-  const allowedOperations = /^(SELECT|INSERT|UPDATE|DELETE|EXECUTE|CALL|CREATE)\s+/i;
+  const allowedOperations = /^(SELECT|INSERT|UPDATE|DELETE|EXECUTE|CALL|CREATE|DROP)\s+/i;
   if (!allowedOperations.test(sql.trim())) {
-    throw createError('Only SELECT, INSERT, UPDATE, DELETE, EXECUTE, and CALL operations are allowed', 400);
+    throw createError('Only SELECT, INSERT, UPDATE, DELETE, EXECUTE, CALL, CREATE, and DROP operations are allowed', 400);
   }
 };
 

@@ -110,9 +110,10 @@ export class CrudService {
   public async delete(
     tableName: string,
     whereClause: string,
-    params: any[] = []
+    params: any[] = [],
+    idColumn: string = 'ID'
   ): Promise<ExecuteResult> {
-    const sql = `DELETE FROM ${tableName} WHERE ${whereClause}`;
+    const sql = `DELETE FROM ${tableName} WHERE ${whereClause} ${idColumn ? `RETURNING ${idColumn}` : ''}`;
     return await firebirdConnection.executeCommand(sql, params);
   }
 
@@ -124,7 +125,7 @@ export class CrudService {
     id: any,
     idColumn: string = 'ID'
   ): Promise<ExecuteResult> {
-    return await this.delete(tableName, `${idColumn} = ?`, [id]);
+    return await this.delete(tableName, `${idColumn} = ?`, [id], idColumn);
   }
 
   /**

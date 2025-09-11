@@ -5,20 +5,38 @@ describe('CRUD API', () => {
   const testTable = 'TEST_TABLE';
   let createdId: any;
 
-  it('GET /api/crud/:table/count', async () => {
-    const res = await request(app).get(`/api/crud/${testTable}/count`);
-    expect(res.status).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(typeof res.body.data.count).toBe('number');
+  beforeAll(async () => {
+    // Create test table
+    await request(app)
+      .post('/api/query/command')
+      .send({
+        sql: `CREATE TABLE ${testTable} (ID INTEGER NOT NULL PRIMARY KEY, NAME VARCHAR(100), RATE INTEGER)`
+      });
+  });
+
+  afterAll(async () => {
+    // Drop test table
+    await request(app)
+      .post('/api/query/command')
+      .send({
+        sql: `DROP TABLE ${testTable}`
+      });
   });
 
   it('POST /api/crud/:table', async () => {
     const res = await request(app)
       .post(`/api/crud/${testTable}`)
-      .send({ NAME: 'test', VALUE: 123 });
+      .send({ ID: 1, NAME: 'test', RATE: 123 });
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
     createdId = res.body.data.id;
+  });
+
+  it('GET /api/crud/:table/count', async () => {
+    const res = await request(app).get(`/api/crud/${testTable}/count`);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(typeof res.body.data.count).toBe('number');
   });
 
   it('GET /api/crud/:table', async () => {
@@ -38,7 +56,7 @@ describe('CRUD API', () => {
   it('PUT /api/crud/:table/:id', async () => {
     const res = await request(app)
       .put(`/api/crud/${testTable}/${createdId}`)
-      .send({ VALUE: 456 });
+      .send({ RATE: 456 });
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.affectedRows).toBeGreaterThan(0);

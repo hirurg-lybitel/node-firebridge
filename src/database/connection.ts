@@ -104,7 +104,7 @@ class FirebirdConnectionManager {
         }
         resolve({
           affectedRows: Array.isArray(result) ? result.length : 0,
-          recordId: Array.isArray(result) && result.length === 0 ? result[0] : undefined,
+          recordId: Array.isArray(result) && result.length === 1 ? result[0] : undefined,
           meta: [],
         });
       });
