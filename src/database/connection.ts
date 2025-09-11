@@ -113,18 +113,58 @@ class FirebirdConnectionManager {
 
   public async executeTransaction<T>(
     operations: Array<{ sql: string; params?: any[] }>,
-    isolation: string = 'READ_COMMITTED'
+    isolation: string = 'READ_COMMITTED',
+    timeoutMs: number = TIMEOUT
   ): Promise<T[]> {
     const db = await this.getConnection();
-    // node-firebird требует явно передавать уровень изоляции
+
     const isolationLevel = Firebird.ISOLATION_READ_COMMITTED;
     return new Promise((resolve, reject) => {
-      db.transaction(isolationLevel, (err, transaction) => {
+      let timeoutId: NodeJS.Timeout | null = null;
+      let finished = false;
+      let transaction: any = null;
+
+      // Set up timeout
+      timeoutId = setTimeout(() => {
+        if (!finished) {
+          finished = true;
+          if (transaction) {
+            try { transaction.rollback(() => {}); } catch {
+              // Intentionally ignore rollback errors
+            }
+          }
+          db.detach();
+          reject(new Error(`Transaction timed out after ${timeoutMs} ms`));
+        }
+      }, timeoutMs);
+
+      db.transaction(isolationLevel, (err, t) => {
+        if (finished) return;
         if (err) {
+          finished = true;
+          if (timeoutId) clearTimeout(timeoutId);
           reject(new Error(`Failed to start transaction: ${err.message}`));
           return;
         }
-        this.executeTransactionOperations(transaction, operations, resolve, reject);
+        transaction = t;
+        this.executeTransactionOperations(
+          transaction,
+          operations,
+          (results: T[]) => {
+            if (finished) return;
+            finished = true;
+            if (timeoutId) clearTimeout(timeoutId);
+            db.detach();
+            resolve(results);
+          },
+          (reason?: any) => {
+            if (finished) return;
+            finished = true;
+            if (timeoutId) clearTimeout(timeoutId);
+            db.detach();
+            reject(reason instanceof Error ? reason : new Error(String(reason)));
+          }
+        );
       });
     });
   }

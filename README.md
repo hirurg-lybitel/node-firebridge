@@ -250,6 +250,7 @@ Get count of records in a table.
 
 ### Transaction Operations
 
+
 #### POST /api/transaction/execute
 Execute multiple operations in a transaction.
 
@@ -262,8 +263,8 @@ Execute multiple operations in a transaction.
       "params": ["John", "john@example.com"]
     },
     {
-      "sql": "INSERT INTO profiles (user_id, bio) VALUES (?, ?)",
-      "params": [1, "Software developer"]
+      "sql": "UPDATE users SET name = ? WHERE id = ?",
+      "params": ["Jane", 1]
     }
   ],
   "isolation": "READ_COMMITTED"
@@ -287,8 +288,35 @@ Batch insert multiple records.
 #### POST /api/transaction/batch-update
 Batch update multiple records.
 
+**Request Body:**
+```json
+{
+  "table": "users",
+  "updates": [
+    {
+      "id": 1,
+      "data": { "name": "John Updated", "email": "john.updated@example.com" }
+    },
+    {
+      "id": 2,
+      "data": { "name": "Jane Updated" }
+    }
+  ],
+  "idColumn": "ID"
+}
+```
+
 #### POST /api/transaction/batch-delete
 Batch delete multiple records.
+
+**Request Body:**
+```json
+{
+  "table": "users",
+  "ids": [1, 2, 3],
+  "idColumn": "ID"
+}
+```
 
 ## Security Features
 

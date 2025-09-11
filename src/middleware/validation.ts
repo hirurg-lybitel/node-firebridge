@@ -140,9 +140,9 @@ export const validationSchemas = {
 // Validate SQL query for security
 export const validateSqlQuery = (sql: string): void => {
   const dangerousPatterns = [
-    /DROP\s+(TABLE|DATABASE|INDEX|PROCEDURE|FUNCTION|TRIGGER)/i,
+    // /DROP\s+(TABLE|DATABASE|INDEX|PROCEDURE|FUNCTION|TRIGGER)/i,
     /ALTER\s+(TABLE|DATABASE)/i,
-    /CREATE\s+(TABLE|DATABASE|INDEX|PROCEDURE|FUNCTION|TRIGGER)/i,
+    // /CREATE\s+(TABLE|DATABASE|INDEX|PROCEDURE|FUNCTION|TRIGGER)/i,
     /GRANT\s+/i,
     /REVOKE\s+/i,
     /EXECUTE\s+AS\s+/i,
@@ -158,7 +158,7 @@ export const validateSqlQuery = (sql: string): void => {
   }
 
   // Check for minimum length and presence of SELECT/INSERT/UPDATE/DELETE
-  const allowedOperations = /^(SELECT|INSERT|UPDATE|DELETE|EXECUTE|CALL)\s+/i;
+  const allowedOperations = /^(SELECT|INSERT|UPDATE|DELETE|EXECUTE|CALL|CREATE)\s+/i;
   if (!allowedOperations.test(sql.trim())) {
     throw createError('Only SELECT, INSERT, UPDATE, DELETE, EXECUTE, and CALL operations are allowed', 400);
   }
